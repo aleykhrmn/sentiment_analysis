@@ -58,6 +58,7 @@ if os.path.exists(file_path):
 
     # Önişlenmiş veriyi yeni bir Excel dosyasına kaydet
     preprocessed_data.to_excel('preprocessed_dataset.xlsx', index=False)
+    print("Önişlenmiş veri 'preprocessed_dataset.xlsx' adlı dosyaya kaydedildi.")
 
     print("Kelimeler bulunuyor...")
     # Tüm farklı kelimeleri bul
@@ -77,8 +78,7 @@ if os.path.exists(file_path):
 
     # Unique kelimeleri yeni bir Excel dosyasına kaydetme
     unique_words_df.to_excel('unique_words.xlsx', index=False)
-
-    print("Kelime bulma işlemi tamamlandı.")
+    print("Kelimeler 'unique_words.xlsx' adlı dosyaya kaydedildi.")
 
     # Verileri yükleme
     kelimeler = pd.read_excel("unique_words.xlsx")
@@ -113,17 +113,25 @@ if os.path.exists(file_path):
     all_data_df = pd.DataFrame(all_data, columns=kelime_listesi + ['Duygu Puanı'])
 
     # DataFrame'i ekrana yazdırma
-    print(all_data_df)
+    #print(all_data_df)
 
     # DataFrame'i bir CSV dosyasına kaydetme
     all_data_df.to_csv('all_data.csv', index=False)
+    print("Veri 'all_data.csv' adlı dosyaya kaydedildi.")
 
-    print("Veri CSV dosyasına kaydedildi.")
 
+    #saved_df = pd.read_csv('all_data.csv')
+    #print("Kaydedilen CSV dosyasının boyutu:", saved_df.shape)
+    
+    # Birleştirme işlemi
+    birlesik_veri = pd.merge(metinler, yildizlar, left_index=True, right_index=True)
 
-    saved_df = pd.read_csv('all_data.csv')
-    print("Kaydedilen CSV dosyasının boyutu:", saved_df.shape)
-    print(saved_df.head())  # İlk birkaç satırı gösterme
+    # Yeni sütun ekleme işlemi
+    birlesik_veri['duygu'] = pd.cut(birlesik_veri['overall'], bins=[0, 2, 3, 5], labels=['negatif', 'nötr', 'pozitif'])
+
+    # Birleştirilmiş veriyi Excel'e yazdırma
+    birlesik_veri.to_excel("data.xlsx", index=False)
+    print("Önişlenmiş veri ve duygular 'data.xlsx' adlı dosyaya kaydedildi.")
 
 else:
     print("Dosya bulunamadı.")
