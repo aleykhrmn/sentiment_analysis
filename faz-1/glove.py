@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import classification_report
 
 # Birleşik veri dosyasının yolu
@@ -49,7 +50,7 @@ if os.path.exists(file_path):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Logistic Regression
-    LR = LogisticRegression(max_iter=1000)
+    LR = LogisticRegression(max_iter=20000)
     LR.fit(X_train, y_train)
 
     # Support Vector Machine
@@ -64,28 +65,36 @@ if os.path.exists(file_path):
     RF = RandomForestClassifier()
     RF.fit(X_train, y_train)
 
+    # Artificial Neural Network (MLPClassifier)
+    ANN = MLPClassifier()
+    ANN.fit(X_train, y_train)
+
     # Eğitim setlerinde model performanslarını değerlendirme
     lr_train_accuracy = LR.score(X_train, y_train)
     svm_train_accuracy = SVM.score(X_train, y_train)
     dt_train_accuracy = DT.score(X_train, y_train)
     rf_train_accuracy = RF.score(X_train, y_train)
+    ann_train_accuracy = ANN.score(X_train, y_train)
 
     # Test setlerinde model performanslarını değerlendirme
     lr_test_accuracy = LR.score(X_test, y_test)
     svm_test_accuracy = SVM.score(X_test, y_test)
     dt_test_accuracy = DT.score(X_test, y_test)
     rf_test_accuracy = RF.score(X_test, y_test)
+    ann_test_accuracy = ANN.score(X_test, y_test)
 
     # Sonuçları yazdırma
-    print("Logistic Regression Eğitim Seti Accuracy:", lr_train_accuracy)
-    print("Support Vector Machine Eğitim Seti Accuracy:", svm_train_accuracy)
-    print("Decision Tree Eğitim Seti Accuracy:", dt_train_accuracy)
-    print("Random Forest Eğitim Seti Accuracy:", rf_train_accuracy)
+    # print("\nLogistic Regression Eğitim Seti Accuracy:", lr_train_accuracy)
+    # print("Support Vector Machine Eğitim Seti Accuracy:", svm_train_accuracy)
+    # print("Decision Tree Eğitim Seti Accuracy:", dt_train_accuracy)
+    # print("Random Forest Eğitim Seti Accuracy:", rf_train_accuracy)
+    # print("Artificial Neural Network Eğitim Seti Accuracy:", ann_train_accuracy)
 
     print("\nLogistic Regression Test Set Accuracy:", lr_test_accuracy)
     print("Support Vector Machine Test Set Accuracy:", svm_test_accuracy)
     print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
     print("Random Forest Test Set Accuracy:", rf_test_accuracy)
+    print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
 
     # Eğitim setlerinde sınıflandırma raporu
     print("\nLogistic Regression Eğitim Seti Sınıflandırma Raporu:")
@@ -103,6 +112,10 @@ if os.path.exists(file_path):
     print("\nRandom Forest Eğitim Seti Sınıflandırma Raporu:")
     rf_train_pred = RF.predict(X_train)
     print(classification_report(y_train, rf_train_pred, zero_division=1))
+    
+    print("\nArtificial Neural Network Eğitim Seti Sınıflandırma Raporu:")
+    ann_train_pred = ANN.predict(X_train)
+    print(classification_report(y_train, ann_train_pred, zero_division=1))
 
     # Test setlerinde sınıflandırma raporu
     print("\nLogistic Regression Test Seti Sınıflandırma Raporu:")
@@ -121,6 +134,9 @@ if os.path.exists(file_path):
     rf_test_pred = RF.predict(X_test)
     print(classification_report(y_test, rf_test_pred, zero_division=1))
 
+    print("\nArtificial Neural Network Test Seti Sınıflandırma Raporu:")
+    ann_test_pred = ANN.predict(X_test)
+    print(classification_report(y_test, ann_test_pred, zero_division=1))
+
 else:
     print("Dosya bulunamadı veya açılamadı. Lütfen dosya yolunu kontrol edin.")
-
