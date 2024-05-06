@@ -104,25 +104,25 @@ if os.path.exists(file_path):
                 all_data[i, kelime_listesi.index(k[j])] = 1
                 
 
-    # Duygu puanlarını ekleme
-    all_data[:, -1] = yildizlar.iloc[:, 0]
+    # Duygu puanlarını ekleme ve pozitif, negatif veya nötr olarak işaretleme
+    for i in range(satir):
+        duygu_puani = yildizlar.iloc[i, 0]
+        if duygu_puani > 3:
+            all_data[i, -1] = 1  # Pozitif
+        elif duygu_puani < 3:
+            all_data[i, -1] = -1  # Negatif
+        else:
+            all_data[i, -1] = 0  # Nötr
     
     print("Matris oluşturuldu.")
     
     # NumPy dizisini DataFrame'e dönüştürme
-    all_data_df = pd.DataFrame(all_data, columns=kelime_listesi + ['Duygu Puanı'])
-
-    # DataFrame'i ekrana yazdırma
+    all_data_df = pd.DataFrame(all_data, columns=kelime_listesi + ['Sentiment'])
     #print(all_data_df)
-
     # DataFrame'i bir CSV dosyasına kaydetme
     all_data_df.to_csv('all_data.csv', index=False)
     print("Veri 'all_data.csv' adlı dosyaya kaydedildi.")
 
-
-    #saved_df = pd.read_csv('all_data.csv')
-    #print("Kaydedilen CSV dosyasının boyutu:", saved_df.shape)
-    
     # Birleştirme işlemi
     birlesik_veri = pd.merge(metinler, yildizlar, left_index=True, right_index=True)
 
