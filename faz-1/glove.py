@@ -151,3 +151,5 @@ if os.path.exists(file_path):
 
 else:
     print("Dosya bulunamadı veya açılamadı. Lütfen dosya yolunu kontrol edin.")
+
+    
