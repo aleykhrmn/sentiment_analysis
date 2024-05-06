@@ -7,7 +7,11 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
+import xgboost as xgb
+from sklearn.preprocessing import LabelEncoder
+from lightgbm import LGBMClassifier
 
 # Birleşik veri dosyasının yolu
 file_path = 'data.xlsx'
@@ -69,12 +73,29 @@ if os.path.exists(file_path):
     ANN = MLPClassifier()
     ANN.fit(X_train, y_train)
 
+    # XGBoost
+    label_encoder = LabelEncoder()
+    y_train_encoded = label_encoder.fit_transform(y_train)
+    XGB = xgb.XGBClassifier()
+    XGB.fit(X_train, y_train_encoded)
+
+    # K-Nearest Neighbors
+    KNN = KNeighborsClassifier()
+    KNN.fit(X_train, y_train)
+
+    # LightGBM
+    LGB = LGBMClassifier(verbose=0)  # verbose=0 ile içsel bilgilendirme mesajları bastırılmayacak
+    LGB.fit(X_train, y_train)
+
     # Eğitim setlerinde model performanslarını değerlendirme
     lr_train_accuracy = LR.score(X_train, y_train)
     svm_train_accuracy = SVM.score(X_train, y_train)
     dt_train_accuracy = DT.score(X_train, y_train)
     rf_train_accuracy = RF.score(X_train, y_train)
     ann_train_accuracy = ANN.score(X_train, y_train)
+    xgb_train_accuracy = XGB.score(X_train, y_train_encoded)
+    knn_train_accuracy = KNN.score(X_train, y_train)
+    lgb_train_accuracy = LGB.score(X_train, y_train)
 
     # Test setlerinde model performanslarını değerlendirme
     lr_test_accuracy = LR.score(X_test, y_test)
@@ -82,40 +103,18 @@ if os.path.exists(file_path):
     dt_test_accuracy = DT.score(X_test, y_test)
     rf_test_accuracy = RF.score(X_test, y_test)
     ann_test_accuracy = ANN.score(X_test, y_test)
-
-    # Sonuçları yazdırma
-    # print("\nLogistic Regression Eğitim Seti Accuracy:", lr_train_accuracy)
-    # print("Support Vector Machine Eğitim Seti Accuracy:", svm_train_accuracy)
-    # print("Decision Tree Eğitim Seti Accuracy:", dt_train_accuracy)
-    # print("Random Forest Eğitim Seti Accuracy:", rf_train_accuracy)
-    # print("Artificial Neural Network Eğitim Seti Accuracy:", ann_train_accuracy)
+    xgb_test_accuracy = XGB.score(X_test, label_encoder.transform(y_test))
+    knn_test_accuracy = KNN.score(X_test, y_test)
+    lgb_test_accuracy = LGB.score(X_test, y_test)
 
     print("\nLogistic Regression Test Set Accuracy:", lr_test_accuracy)
     print("Support Vector Machine Test Set Accuracy:", svm_test_accuracy)
     print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
     print("Random Forest Test Set Accuracy:", rf_test_accuracy)
     print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
-
-    # Eğitim setlerinde sınıflandırma raporu
-    print("\nLogistic Regression Eğitim Seti Sınıflandırma Raporu:")
-    lr_train_pred = LR.predict(X_train)
-    print(classification_report(y_train, lr_train_pred, zero_division=1))
-
-    print("\nSupport Vector Machine Eğitim Seti Sınıflandırma Raporu:")
-    svm_train_pred = SVM.predict(X_train)
-    print(classification_report(y_train, svm_train_pred, zero_division=1))
-
-    print("\nDecision Tree Eğitim Seti Sınıflandırma Raporu:")
-    dt_train_pred = DT.predict(X_train)
-    print(classification_report(y_train, dt_train_pred, zero_division=1))
-
-    print("\nRandom Forest Eğitim Seti Sınıflandırma Raporu:")
-    rf_train_pred = RF.predict(X_train)
-    print(classification_report(y_train, rf_train_pred, zero_division=1))
-    
-    print("\nArtificial Neural Network Eğitim Seti Sınıflandırma Raporu:")
-    ann_train_pred = ANN.predict(X_train)
-    print(classification_report(y_train, ann_train_pred, zero_division=1))
+    print("XGBoost Test Set Accuracy:", xgb_test_accuracy)
+    print("K-Nearest Neighbors Test Set Accuracy:", knn_test_accuracy)
+    print("LightGBM Test Set Accuracy:", lgb_test_accuracy)
 
     # Test setlerinde sınıflandırma raporu
     print("\nLogistic Regression Test Seti Sınıflandırma Raporu:")
@@ -137,6 +136,18 @@ if os.path.exists(file_path):
     print("\nArtificial Neural Network Test Seti Sınıflandırma Raporu:")
     ann_test_pred = ANN.predict(X_test)
     print(classification_report(y_test, ann_test_pred, zero_division=1))
+
+    print("\nXGBoost Test Seti Sınıflandırma Raporu:")
+    xgb_test_pred = XGB.predict(X_test)
+    print(classification_report(y_test, label_encoder.inverse_transform(xgb_test_pred), zero_division=1))
+
+    print("\nK-Nearest Neighbors Test Seti Sınıflandırma Raporu:")
+    knn_test_pred = KNN.predict(X_test)
+    print(classification_report(y_test, knn_test_pred, zero_division=1))
+
+    print("\nLightGBM Test Seti Sınıflandırma Raporu:")
+    lgb_test_pred = LGB.predict(X_test)
+    print(classification_report(y_test, lgb_test_pred, zero_division=1))
 
 else:
     print("Dosya bulunamadı veya açılamadı. Lütfen dosya yolunu kontrol edin.")
