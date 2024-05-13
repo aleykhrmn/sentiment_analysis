@@ -4,14 +4,16 @@ import numpy as np
 from gensim.models import FastText
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.svm import SVC
-from sklearn import metrics
 from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import MultinomialNB, ComplementNB, GaussianNB, BernoulliNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
+import xgboost as xgb
+from sklearn.preprocessing import LabelEncoder
+from lightgbm import LGBMClassifier
+from sklearn.naive_bayes import BernoulliNB
 
 # Birleşik veri dosyasının yolu
 file_path = 'data.xlsx'
@@ -36,151 +38,103 @@ if os.path.exists(file_path):
     # Eğitim ve test setlerine ayırma
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Verilerin negatif değerlerini ele almak için Min-Max ölçeklendirme
-    scaler = MinMaxScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    # Logistic Regression
+    LR = LogisticRegression(max_iter=20000)
+    LR.fit(X_train, y_train)
 
-    # Modelleri oluşturma ve eğitme
+    # Support Vector Machine
+    SVM = SVC()
+    SVM.fit(X_train, y_train)
 
-    # Decision Tree modelini oluşturun
-    dt_model = DecisionTreeClassifier()
-    dt_model.fit(X_train_scaled, y_train)
+    # Decision Tree
+    DT = DecisionTreeClassifier()
+    DT.fit(X_train, y_train)
 
-    # Lojistik Regresyon modelini oluşturun
-    log_reg_model = LogisticRegression(max_iter=1000)  # Artırılmış iterasyon limiti
-    log_reg_model.fit(X_train_scaled, y_train)
+    # Random Forest
+    RF = RandomForestClassifier()
+    RF.fit(X_train, y_train)
 
-    # Random Forest modelini oluşturun
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_model.fit(X_train_scaled, y_train)
-    
-    # Yapay Sinir Ağı modelini oluşturma ve eğitme
-    ANN = MLPClassifier(hidden_layer_sizes=(100,), max_iter=1000)
+    # Artificial Neural Network (MLPClassifier)
+    ANN = MLPClassifier(hidden_layer_sizes=(100,), max_iter=20000)
     ANN.fit(X_train, y_train)
 
-    # SVM modelini oluşturma ve eğitme
-    svm_model = SVC()  
-    svm_model.fit(X_train_scaled, y_train)
-    
-    # Multinomial Naive Bayes modelini oluşturun ve eğitin
-    mnb_model = MultinomialNB()
-    mnb_model.fit(X_train_scaled, y_train)
-    
-    # Complement Naive Bayes modelini oluşturun ve eğitin
-    cnb_model = ComplementNB()
-    cnb_model.fit(X_train_scaled, y_train)
-    
-    # Gaussian Naive Bayes modelini oluşturun ve eğitin
-    gnb_model = GaussianNB()
-    gnb_model.fit(X_train, y_train)
-    
-    # Bernoulli Naive Bayes modelini oluşturun ve eğitin
-    bnb_model = BernoulliNB()
-    bnb_model.fit(X_train_scaled, y_train)
+    # XGBoost
+    label_encoder = LabelEncoder()
+    y_train_encoded = label_encoder.fit_transform(y_train)
+    XGB = xgb.XGBClassifier()
+    XGB.fit(X_train, y_train_encoded)
 
-    # Performans metriklerini hesaplama
+    # K-Nearest Neighbors
+    KNN = KNeighborsClassifier()
+    KNN.fit(X_train, y_train)
 
-    # Decision Tree için performans metrikleri
-    dt_pred = dt_model.predict(X_test_scaled)
-    dt_accuracy = metrics.accuracy_score(dt_pred, y_test)
-    dt_train_pred = dt_model.predict(X_train_scaled)
-    dt_train_accuracy = metrics.accuracy_score(dt_train_pred, y_train)
+    # LightGBM
+    LGB = LGBMClassifier(verbose=0)  # verbose=0 ile içsel bilgilendirme mesajları bastırılmayacak
+    LGB.fit(X_train, y_train)
 
-    # Lojistik Regresyon için performans metrikleri
-    log_reg_pred = log_reg_model.predict(X_test_scaled)
-    log_reg_accuracy = metrics.accuracy_score(log_reg_pred, y_test)
-    log_reg_train_pred = log_reg_model.predict(X_train_scaled)
-    log_reg_train_accuracy = metrics.accuracy_score(log_reg_train_pred, y_train)
+    # Bernoulli Naive Bayes
+    BNB = BernoulliNB()
+    BNB.fit(X_train, y_train)
 
-    # Random Forest için performans metrikleri
-    rf_pred = rf_model.predict(X_test_scaled)
-    rf_accuracy = metrics.accuracy_score(rf_pred, y_test)
-    rf_train_pred = rf_model.predict(X_train_scaled)
-    rf_train_accuracy = metrics.accuracy_score(rf_train_pred, y_train)
-
-    # Yapay Sinir Ağı için performans metrikleri
-    ann_train_accuracy = ANN.score(X_train, y_train)
+    # Test setlerinde model performanslarını değerlendirme
+    lr_test_accuracy = LR.score(X_test, y_test)
+    svm_test_accuracy = SVM.score(X_test, y_test)
+    dt_test_accuracy = DT.score(X_test, y_test)
+    rf_test_accuracy = RF.score(X_test, y_test)
     ann_test_accuracy = ANN.score(X_test, y_test)
+    xgb_test_accuracy = XGB.score(X_test, label_encoder.transform(y_test))
+    knn_test_accuracy = KNN.score(X_test, y_test)
+    lgb_test_accuracy = LGB.score(X_test, y_test)
+    bnb_test_accuracy = BNB.score(X_test, y_test)
     
-    # SVM için performans metrikleri
-    svm_pred = svm_model.predict(X_test_scaled)
-    svm_accuracy = metrics.accuracy_score(svm_pred, y_test)
-    svm_train_pred = svm_model.predict(X_train_scaled)
-    svm_train_accuracy = metrics.accuracy_score(svm_train_pred, y_train)
+    print("\nBernoulli Naive Bayes Test Set Accuracy:", bnb_test_accuracy)
+    print("Logistic Regression Test Set Accuracy:", lr_test_accuracy)
+    print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
+    print("Random Forest Test Set Accuracy:", rf_test_accuracy)
+    print("Support Vector Machine Test Set Accuracy:", svm_test_accuracy)
+    print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
+    print("K-Nearest Neighbors Test Set Accuracy:", knn_test_accuracy)
+    print("XGBoost Test Set Accuracy:", xgb_test_accuracy)
+    print("LightGBM Test Set Accuracy:", lgb_test_accuracy)
     
-    # Multinomial Naive Bayes için performans metrikleri
-    mnb_accuracy = mnb_model.score(X_test_scaled, y_test)
-    mnb_train_accuracy = mnb_model.score(X_train_scaled, y_train)
-    
-    # Complement Naive Bayes için performans metrikleri
-    cnb_accuracy = cnb_model.score(X_test_scaled, y_test)
-    cnb_train_accuracy = cnb_model.score(X_train_scaled, y_train)
-    
-    # Gaussian Naive Bayes için performans metrikleri
-    gnb_accuracy = gnb_model.score(X_test, y_test)
-    gnb_train_accuracy = gnb_model.score(X_train, y_train)
-    
-    # Bernoulli Naive Bayes için performans metrikleri
-    bnb_accuracy = bnb_model.score(X_test_scaled, y_test)
-    bnb_train_accuracy = bnb_model.score(X_train_scaled, y_train)
 
-    # Performans metriklerini yazdırma
-    print("Bernoulli Naive Bayes Test Set Accuracy: ", bnb_accuracy)    
-    print("Complement Naive Bayes Test Set Accuracy: ", cnb_accuracy)
-    print("Gaussian Naive Bayes Test Set Accuracy: ", gnb_accuracy)
-    print("Multinomial Naive Bayes Test Set Accuracy: ", mnb_accuracy)
-    print("Logistic Regression Test Set Accuracy: ", log_reg_accuracy)
-    print("Decision Tree Test Set Accuracy: ", dt_accuracy)
-    print("Random Forest Test Set Accuracy: ", rf_accuracy)
-    print("Yapay Sinir Ağı Test Seti Accuracy:", ann_test_accuracy)
-    print("SVM Test Set Accuracy: ", svm_accuracy)
-
-    # Bernoulli Naive Bayes sınıflandırma raporu
-    bnb_test_pred = bnb_model.predict(X_test_scaled)
-    print("\nBernoulli Naive Bayes Classification Report:")
+    # Test setlerinde sınıflandırma raporu
+    
+    print("\nBernoulli Naive Bayes Test Seti Sınıflandırma Raporu:")
+    bnb_test_pred = BNB.predict(X_test)
     print(classification_report(y_test, bnb_test_pred, zero_division=1))
+    
+    print("\nLogistic Regression Test Seti Sınıflandırma Raporu:")
+    lr_test_pred = LR.predict(X_test)
+    print(classification_report(y_test, lr_test_pred, zero_division=1))
 
-    # Complement Naive Bayes sınıflandırma raporu
-    cnb_test_pred = cnb_model.predict(X_test_scaled)
-    print("\nComplement Naive Bayes Classification Report:")
-    print(classification_report(y_test, cnb_test_pred, zero_division=1))
-    
-    # Gaussian Naive Bayes sınıflandırma raporu
-    gnb_test_pred = gnb_model.predict(X_test)
-    print("\nGaussian Naive Bayes Classification Report:")
-    print(classification_report(y_test, gnb_test_pred, zero_division=1))
-    
-    # Multinomial Naive Bayes sınıflandırma raporu
-    mnb_test_pred = mnb_model.predict(X_test_scaled)
-    print("\nMultinomial Naive Bayes Classification Report:")
-    print(classification_report(y_test, mnb_test_pred, zero_division=1))
-    
-    # Logistic Regression sınıflandırma raporu
-    log_reg_report = classification_report(y_test, log_reg_pred, zero_division=1)
-    print("Logistic Regression Classification Report:")
-    print(log_reg_report)
-    
-    # Random Forest sınıflandırma raporu
-    rf_report = classification_report(y_test, rf_pred, zero_division=1)
-    print("Random Forest Classification Report:")
-    print(rf_report)
-    
-    # Decision Tree sınıflandırma raporu
-    dt_report = classification_report(y_test, dt_pred, zero_division=1)
-    print("Decision Tree Classification Report:")
-    print(dt_report)
+    print("\nDecision Tree Test Seti Sınıflandırma Raporu:")
+    dt_test_pred = DT.predict(X_test)
+    print(classification_report(y_test, dt_test_pred, zero_division=1))
 
-    # Yapay Sinir Ağı sınıflandırma raporu
-    print("\nYapay Sinir Ağı Test Seti Sınıflandırma Raporu:")
+    print("\nRandom Forest Test Seti Sınıflandırma Raporu:")
+    rf_test_pred = RF.predict(X_test)
+    print(classification_report(y_test, rf_test_pred, zero_division=1))
+    
+    print("\nSupport Vector Machine Test Seti Sınıflandırma Raporu:")
+    svm_test_pred = SVM.predict(X_test)
+    print(classification_report(y_test, svm_test_pred, zero_division=1))
+
+    print("\nArtificial Neural Network Test Seti Sınıflandırma Raporu:")
     ann_test_pred = ANN.predict(X_test)
     print(classification_report(y_test, ann_test_pred, zero_division=1))
+
+    print("\nK-Nearest Neighbors Test Seti Sınıflandırma Raporu:")
+    knn_test_pred = KNN.predict(X_test)
+    print(classification_report(y_test, knn_test_pred, zero_division=1))
     
-    # SVM sınıflandırma raporu
-    svm_report = classification_report(y_test, svm_pred, zero_division=1)
-    print("SVM Classification Report:")
-    print(svm_report)
-    
-    
+    print("\nXGBoost Test Seti Sınıflandırma Raporu:")
+    xgb_test_pred = XGB.predict(X_test)
+    print(classification_report(y_test, label_encoder.inverse_transform(xgb_test_pred), zero_division=1))
+
+    print("\nLightGBM Test Seti Sınıflandırma Raporu:")
+    lgb_test_pred = LGB.predict(X_test)
+    print(classification_report(y_test, lgb_test_pred, zero_division=1))
+
 else:
     print("Dosya bulunamadı veya açılamadı. Lütfen dosya yolunu kontrol edin.")
