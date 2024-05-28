@@ -13,6 +13,11 @@ from nltk.stem import PorterStemmer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+import xgboost as xgb
+import lightgbm as lgb
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 
 # CSV dosyasını yükle
 if os.path.exists("all_data.csv"):
@@ -33,16 +38,6 @@ BNB = BernoulliNB()
 # Modeli eğitin
 BNB.fit(X_train, y_train)
 
-# Complement Naive Bayes modelini oluşturun
-CNB = ComplementNB()
-# Modeli eğitin
-CNB.fit(X_train, y_train)
-
-# Gaussian Naive Bayes modelini oluşturun
-GNB = GaussianNB()
-# Modeli eğitin
-GNB.fit(X_train, y_train)
-
 # Decision Tree modelini oluşturun
 dt_model = DecisionTreeClassifier()
 # Modeli eğitin
@@ -53,103 +48,95 @@ log_reg_model = LogisticRegression()
 # Modeli eğitin
 log_reg_model.fit(X_train, y_train)
 
-# Naive Bayes modelini oluşturma ve eğitme
-nb_model = MultinomialNB()
-nb_model.fit(X_train, y_train)
-
 # Random Forest modelini oluşturun
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
 # Modeli eğitin
 rf_model.fit(X_train, y_train)
 
+# Support Vector Machine (SVM) modelini oluşturun ve eğitin
+svm_model = SVC()
+svm_model.fit(X_train, y_train)
+
+# Artificial Neural Network (ANN) modelini oluşturun ve eğitin
+ann_model = MLPClassifier()
+ann_model.fit(X_train, y_train)
+
+# K-Nearest Neighbors (KNN) modelini oluşturun ve eğitin
+knn_model = KNeighborsClassifier()
+knn_model.fit(X_train, y_train)
+
+# XGBoost modelini oluşturun ve eğitin
+xgb_model = xgb.XGBClassifier()
+xgb_model.fit(X_train, y_train)
+
+# LightGBM modelini oluşturun ve eğitin
+lgb_model = lgb.LGBMClassifier()
+lgb_model.fit(X_train, y_train)
+
 # Bernoulli Naive Bayes için performans metrikleri
 accuracy_score_bnb = metrics.accuracy_score(BNB.predict(X_test), y_test)
-train_accuracy_bnb = metrics.accuracy_score(BNB.predict(X_train), y_train)
-train_pred_bnb = BNB.predict(X_train)
 test_pred_bnb = BNB.predict(X_test)
-
-# Complement Naive Bayes için performans metrikleri
-accuracy_score_cnb = metrics.accuracy_score(CNB.predict(X_test), y_test)
-train_accuracy_cnb = metrics.accuracy_score(CNB.predict(X_train), y_train)
-train_pred_cnb = CNB.predict(X_train)
-test_pred_cnb = CNB.predict(X_test)
-
-# Gaussian Naive Bayes için performans metrikleri
-accuracy_score_gnb = metrics.accuracy_score(GNB.predict(X_test), y_test)
-train_accuracy_gnb = metrics.accuracy_score(GNB.predict(X_train), y_train)
-train_pred_gnb = GNB.predict(X_train)
-test_pred_gnb = GNB.predict(X_test)
 
 # Decision Tree için performans metrikleri
 dt_pred = dt_model.predict(X_test)
 dt_accuracy = metrics.accuracy_score(dt_pred, y_test)
-dt_train_pred = dt_model.predict(X_train)
-dt_train_accuracy = metrics.accuracy_score(dt_train_pred, y_train)
 
 # Lojistik Regresyon için performans metrikleri
 log_reg_pred = log_reg_model.predict(X_test)
 log_reg_accuracy = metrics.accuracy_score(log_reg_pred, y_test)
-log_reg_train_pred = log_reg_model.predict(X_train)
-log_reg_train_accuracy = metrics.accuracy_score(log_reg_train_pred, y_train)
-
-# Naive Bayes için performans metrikleri
-y_pred = nb_model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-train_pred = nb_model.predict(X_train)
-train_accuracy = accuracy_score(y_train, train_pred)
 
 # Random Forest için performans metrikleri
 rf_pred = rf_model.predict(X_test)
 rf_accuracy = metrics.accuracy_score(rf_pred, y_test)
-rf_train_pred = rf_model.predict(X_train)
-rf_train_accuracy = metrics.accuracy_score(rf_train_pred, y_train)
+
+# SVM için performans metrikleri
+svm_pred = svm_model.predict(X_test)
+svm_accuracy = metrics.accuracy_score(svm_pred, y_test)
+
+# ANN için performans metrikleri
+ann_pred = ann_model.predict(X_test)
+ann_accuracy = metrics.accuracy_score(ann_pred, y_test)
+
+# KNN için performans metrikleri
+knn_pred = knn_model.predict(X_test)
+knn_accuracy = metrics.accuracy_score(knn_pred, y_test)
+
+# XGBoost için performans metrikleri
+xgb_pred = xgb_model.predict(X_test)
+xgb_accuracy = metrics.accuracy_score(xgb_pred, y_test)
+
+# LightGBM için performans metrikleri
+lgb_pred = lgb_model.predict(X_test)
+lgb_accuracy = metrics.accuracy_score(lgb_pred, y_test)
 
 # Performans metriklerini yazdırma
-print("Bernoulli Naive Bayes Test Set Accuracy: {:.2f}%".format(accuracy_score_bnb * 100))
-print("Complement Naive Bayes Test Set Accuracy: {:.2f}%".format(accuracy_score_cnb * 100))
-print("Gaussian Naive Bayes Test Set Accuracy: {:.2f}%".format(accuracy_score_gnb * 100))
-print("Decision Tree Test Set Accuracy: {:.2f}%".format(dt_accuracy * 100))
-print("Logistic Regression Test Set Accuracy: {:.2f}%".format(log_reg_accuracy * 100))
-print("Multinomial Naive Bayes Test Set Accuracy: {:.2f}%".format(accuracy * 100))
-print("Random Forest Test Set Accuracy: {:.2f}%".format(rf_accuracy * 100))
-
+print("Bernoulli Naive Bayes Test Seti Doğruluğu:", bnb_test_accuracy)
+print("Logistic Regression Test Seti Doğruluğu:", lr_test_accuracy)
+print("Random Forest Test Seti Doğruluğu:", rf_test_accuracy)
+print("Decision Tree Test Seti Doğruluğu:", dt_test_accuracy)
+print("SVM Test Seti Doğruluğu:", svm_accuracy)
+print("ANN Test Seti Doğruluğu:", ann_accuracy)
+print("KNN Test Seti Doğruluğu:", knn_test_accuracy)
+print("XGBoost Test Seti Doğruluğu:", xgb_test_accuracy)
+print("LightGBM Test Seti Doğruluğu:", lgb_test_accuracy)
 print("\n ")
 
-print("Bernoulli Naive Bayes Training Set Accuracy: {:.2f}%".format(train_accuracy_bnb * 100))
-print("Complement Naive Bayes Training Set Accuracy: {:.2f}%".format(train_accuracy_cnb * 100))
-print("Gaussian Naive Bayes Training Set Accuracy: {:.2f}%".format(train_accuracy_gnb * 100))
-print("Decision Tree Training Set Accuracy: {:.2f}%".format(dt_train_accuracy * 100))
-print("Logistic Regression Training Set Accuracy: {:.2f}%".format(log_reg_train_accuracy * 100))
-print("Multinomial Naive Bayes Training Set Accuracy: {:.2f}%".format(train_accuracy * 100))
-print("Random Forest Training Set Accuracy: {:.2f}%".format(rf_train_accuracy * 100))
-
 # Sınıflandırma raporlarını yazdırma
-
 print("Bernoulli Naive Bayes Classification Report for Test Set:")
-print(classification_report(y_test, test_pred_bnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Bernoulli Naive Bayes Classification Report for Train Set:", )
-print(classification_report(y_train, train_pred_bnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Complement Naive Bayes Classification Report for Test Set:")
-print(classification_report(y_test, test_pred_cnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Complement Naive Bayes Classification Report for Train Set:")
-print(classification_report(y_train, train_pred_cnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Gaussian Naive Bayes Classification Report for Test Set :")
-print(classification_report(y_test, test_pred_gnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Gaussian Naive Bayes Classification Report for Train Set:")
-print(classification_report(y_train, train_pred_gnb, zero_division=1))  # zero_division parametresi ekleniyor
-print("Decision Tree Classification Report for Test Set:")
-print(classification_report(y_test, dt_pred, zero_division=1))  # zero_division parametresi ekleniyor
-print("Decision Tree Classification Report for Training Set:")
-print(classification_report(y_train, dt_train_pred, zero_division=1))  # zero_division parametresi ekleniyor
+print(classification_report(y_test, bnb_pred, zero_division=1))
 print("Logistic Regression Classification Report for Test Set:")
-print(classification_report(y_test, log_reg_pred, zero_division=1))  # zero_division parametresi ekleniyor
-print("Logistic Regression Classification Report for Training Set:")
-print(classification_report(y_train, log_reg_train_pred, zero_division=1))  # zero_division parametresi ekleniyor
-print("Multinomial Naive Bayes Classification Report for Test Set:")
-print(classification_report(y_train, train_pred, zero_division=1))  # zero_division parametresi ekleniyor
-print("Multinomial Naive Bayes Classification Report for Train Set:")
-print(classification_report(y_test, y_pred, zero_division=1))  # zero_division parametresi ekleniyor
+print(classification_report(y_test, log_reg_pred, zero_division=1))
 print("Random Forest Classification Report for Test Set:")
-print(classification_report(y_test, rf_pred, zero_division=1))  # zero_division parametresi ekleniyor
-print("Random Forest Classification Report for Training Set:")
-print(classification_report(y_train, rf_train_pred, zero_division=1))  # zero_division parametresi ekleniyor
+print(classification_report(y_test, rf_pred, zero_division=1))
+print("Decision Tree Classification Report for Test Set:")
+print(classification_report(y_test, dt_pred, zero_division=1))
+print("SVM Classification Report for Test Set:")
+print(classification_report(y_test, svm_pred, zero_division=1))
+print("ANN Classification Report for Test Set:")
+print(classification_report(y_test, ann_pred, zero_division=1))
+print("KNN Classification Report for Test Set:")
+print(classification_report(y_test, knn_pred, zero_division=1))
+print("XGBoost Classification Report for Test Set:")
+print(classification_report(y_test, xgb_pred, zero_division=1))
+print("LightGBM Classification Report for Test Set:")
+print(classification_report(y_test, lgb_pred, zero_division=1))
