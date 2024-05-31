@@ -88,15 +88,15 @@ if os.path.exists(file_path):
     lgb_test_accuracy = LGB.score(X_test, y_test)
 
     # Sonuçları yazdırma
-    print("Bernoulli Naive Bayes Test Seti Doğruluğu:", bnb_test_accuracy)
-    print("Logistic Regression Test Seti Doğruluğu:", lr_test_accuracy)
-    print("Random Forest Test Seti Doğruluğu:", rf_test_accuracy)
-    print("Decision Tree Test Seti Doğruluğu:", dt_test_accuracy)
-    print("SVM Test Seti Doğruluğu:", svm_test_accuracy)
-    print("Yapay Sinir Ağı Test Seti Doğruluğu:", ann_test_accuracy)
-    print("KNN Test Seti Doğruluğu:", knn_test_accuracy)
-    print("XGBoost Test Seti Doğruluğu:", xgb_test_accuracy)
-    print("LightGBM Test Seti Doğruluğu:", lgb_test_accuracy)
+    print("Bernoulli Naive Bayes Test Set Accuracy:", bnb_test_accuracy)
+    print("Logistic Regression Test Set Accuracy:", lr_test_accuracy)
+    print("Random Forest Test Set Accuracy:", rf_test_accuracy)
+    print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
+    print("Support Vector Machine Test Set Accuracy:", svm_test_accuracy)
+    print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
+    print("K-Nearest Neighbors Test Set Accuracy:", knn_test_accuracy)
+    print("XGBoost Test Set Accuracy:", xgb_test_accuracy)
+    print("LightGBM Test Set Accuracy:", lgb_test_accuracy)
 
     # Test setlerinde sınıflandırma raporu    
 
