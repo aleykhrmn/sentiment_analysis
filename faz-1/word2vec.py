@@ -120,11 +120,11 @@ if os.path.exists(file_path):
     # Performans metriklerini yazdırma
     print("Bernoulli Naive Bayes Test Set Accuracy: ", bnb_accuracy)
     print("Logistic Regression Test Set Accuracy: ", log_reg_accuracy)
-    print("Decision Tree Test Set Accuracy: ", dt_accuracy)
     print("Random Forest Test Set Accuracy: ", rf_accuracy)
-    print("SVM Test Set Accuracy: ", svm_accuracy)
-    print("Yapay Sinir Ağı Test Seti Accuracy:", ann_test_accuracy)
-    print("KNN Test Set Accuracy: ", knn_accuracy)
+    print("Decision Tree Test Set Accuracy: ", dt_accuracy)
+    print("Support Vector Machine Test Set Accuracy:", svm_accuracy)
+    print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
+    print("K-Nearest Neighbors Test Set Accuracy:", knn_accuracy)
     print("XGBoost Test Set Accuracy: ", xgb_accuracy)
     print("LightGBM Test Set Accuracy: ", lgb_accuracy)
     
@@ -138,16 +138,16 @@ if os.path.exists(file_path):
     print("Logistic Regression Classification Report:")
     print(log_reg_report)
     
+    # Random Forest sınıflandırma raporu
+    rf_report = classification_report(y_test, rf_pred, zero_division=1)
+    print("Random Forest Classification Report:")
+    print(rf_report)
+    
     # Decision Tree sınıflandırma raporu
     dt_report = classification_report(y_test, dt_pred, zero_division=1)
     print("Decision Tree Classification Report:")
     print(dt_report)
     
-    # Random Forest sınıflandırma raporu
-    rf_report = classification_report(y_test, rf_pred, zero_division=1)
-    print("Random Forest Classification Report:")
-    print(rf_report)
-
     # SVM sınıflandırma raporu
     svm_report = classification_report(y_test, svm_pred, zero_division=1)
     print("SVM Classification Report:")
