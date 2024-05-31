@@ -108,11 +108,11 @@ if os.path.exists(file_path):
     for i in range(satir):
         duygu_puani = yildizlar.iloc[i, 0]
         if duygu_puani > 3:
-            all_data[i, -1] = 1  # Pozitif
+            all_data[i, -1] = 2  # Pozitif
         elif duygu_puani < 3:
-            all_data[i, -1] = -1  # Negatif
+            all_data[i, -1] = 0  # Negatif
         else:
-            all_data[i, -1] = 0  # Nötr
+            all_data[i, -1] = 1  # Nötr
     
     print("Matris oluşturuldu.")
     
@@ -127,7 +127,7 @@ if os.path.exists(file_path):
     birlesik_veri = pd.merge(metinler, yildizlar, left_index=True, right_index=True)
 
     # Yeni sütun ekleme işlemi
-    birlesik_veri['duygu'] = pd.cut(birlesik_veri['overall'], bins=[0, 2, 3, 5], labels=['negatif', 'nötr', 'pozitif'])
+    birlesik_veri['duygu'] = pd.cut(birlesik_veri['overall'], bins=[0, 2, 3, 5], labels=['0', '1', '2'])
 
     # Birleştirilmiş veriyi Excel'e yazdırma
     birlesik_veri.to_excel("data.xlsx", index=False)
