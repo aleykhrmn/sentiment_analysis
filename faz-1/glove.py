@@ -106,8 +106,8 @@ if os.path.exists(file_path):
 
     print("\nBernoulli Naive Bayes Test Set Accuracy:", gnb_test_accuracy)
     print("Logistic Regression Test Set Accuracy:", lr_test_accuracy)
-    print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
     print("Random Forest Test Set Accuracy:", rf_test_accuracy)
+    print("Decision Tree Test Set Accuracy:", dt_test_accuracy)
     print("Support Vector Machine Test Set Accuracy:", svm_test_accuracy)
     print("Artificial Neural Network Test Set Accuracy:", ann_test_accuracy)
     print("K-Nearest Neighbors Test Set Accuracy:", knn_test_accuracy)
@@ -125,14 +125,14 @@ if os.path.exists(file_path):
     print("\nLogistic Regression Test Set Classification Report:")
     lr_test_pred = LR.predict(X_test)
     print(classification_report(y_test, lr_test_pred, zero_division=1))
+    
+    print("\nRandom Forest Test Set Classification Report:")
+    rf_test_pred = RF.predict(X_test)
+    print(classification_report(y_test, rf_test_pred, zero_division=1))
 
     print("\nDecision Tree Test Set Classification Report:")
     dt_test_pred = DT.predict(X_test)
     print(classification_report(y_test, dt_test_pred, zero_division=1))
-
-    print("\nRandom Forest Test Set Classification Report:")
-    rf_test_pred = RF.predict(X_test)
-    print(classification_report(y_test, rf_test_pred, zero_division=1))
     
     print("\nSupport Vector Machine Test Set Classification Report:")
     svm_test_pred = SVM.predict(X_test)
