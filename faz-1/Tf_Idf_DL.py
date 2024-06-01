@@ -1,4 +1,5 @@
 
+
 import os
 import pandas as pd
 import numpy as np
@@ -42,6 +43,7 @@ if os.path.exists(file_path):
     model_cnn = Sequential()
     model_cnn.add(Dense(128, input_shape=(5000,), activation='relu'))
     model_cnn.add(Dropout(0.2))
+    model_cnn.add(Flatten())
     model_cnn.add(Dense(256, activation='relu'))
     model_cnn.add(Dropout(0.5))
     model_cnn.add(Dense(3, activation='softmax'))
@@ -74,7 +76,7 @@ if os.path.exists(file_path):
     y_test_classes = np.argmax(y_test, axis=1)
     print(f'CNN Modeli Test Seti Doğruluğu: {test_accuracy_cnn}')
     print("CNN Modeli Test Seti Sınıflandırma Raporu:")
-    print(classification_report(y_test_classes, y_pred_classes_cnn, target_names=label_encoder.classes_, zero_division=1))
+    print(classification_report(y_test_classes, y_pred_classes_cnn, target_names=[str(cls) for cls in label_encoder.classes_], zero_division=1))
 
     # SimpleRNN Modeli eğitme
     print("\nSimpleRNN Modeli Eğitiliyor...")
@@ -85,7 +87,7 @@ if os.path.exists(file_path):
     y_pred_classes_rnn = np.argmax(y_pred_prob_rnn, axis=1)
     print(f'SimpleRNN Modeli Test Seti Doğruluğu: {test_accuracy_rnn}')
     print("SimpleRNN Modeli Test Seti Sınıflandırma Raporu:")
-    print(classification_report(y_test_classes, y_pred_classes_rnn, target_names=label_encoder.classes_, zero_division=1))
+    print(classification_report(y_test_classes, y_pred_classes_rnn, target_names=[str(cls) for cls in label_encoder.classes_], zero_division=1))
 
     # LSTM Modeli eğitme
     print("\nLSTM Modeli Eğitiliyor...")
@@ -96,7 +98,7 @@ if os.path.exists(file_path):
     y_pred_classes_lstm = np.argmax(y_pred_prob_lstm, axis=1)
     print(f'LSTM Modeli Test Seti Doğruluğu: {test_accuracy_lstm}')
     print("LSTM Modeli Test Seti Sınıflandırma Raporu:")
-    print(classification_report(y_test_classes, y_pred_classes_lstm, target_names=label_encoder.classes_, zero_division=1))
+    print(classification_report(y_test_classes, y_pred_classes_lstm, target_names=[str(cls) for cls in label_encoder.classes_], zero_division=1))
 
 else:
     print("Dosya bulunamadı veya açılamadı. Lütfen dosya yolunu kontrol edin.")
