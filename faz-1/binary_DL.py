@@ -1,77 +1,104 @@
-import os
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, SimpleRNN, Conv1D, MaxPooling1D, Flatten
+from tensorflow.keras.layers import Conv1D, GlobalMaxPooling1D, Dense, Dropout, LSTM, SimpleRNN
 from tensorflow.keras.callbacks import EarlyStopping
 
-# CSV dosyasını yükle
-if os.path.exists("all_data.csv"):
-    all_data = pd.read_csv("all_data.csv", index_col=0)
-else:
-    print("CSV dosyası bulunamadı. Lütfen 'all_data.csv' dosyasını oluşturun veya kontrol edin.")
-    exit()
+# CSV dosyasını yükleme
+df = pd.read_csv('all_data.csv')
 
-# Özellikler ve hedef değişkeni ayırma
-X = all_data.iloc[:, :-1]  # Özellikler
-y = all_data.iloc[:, -1]   # Hedef değişken (duygu puanları)
+# Özellikler (features) ve etiketleri (labels) ayırma
+X = df.drop('Sentiment', axis=1).values
+y = df['Sentiment'].values
 
-# Eğitim ve test verilerine ayırma işlemi
+# Eğitim ve test setlerine bölme
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Veriyi uygun şekilde yeniden şekillendirme
-X_train = X_train.values.reshape((X_train.shape[0], X_train.shape[1], 1))
-X_test = X_test.values.reshape((X_test.shape[0], X_test.shape[1], 1))
+# Verileri normalize etme
+X_train = X_train.astype('float32') / X_train.max()
+X_test = X_test.astype('float32') / X_test.max()
 
-# Early Stopping
+# Verileri CNN, LSTM ve RNN girişine uygun hale getirme
+X_train_exp = np.expand_dims(X_train, axis=2)
+X_test_exp = np.expand_dims(X_test, axis=2)
+
+# EarlyStopping callback'i
 early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
-# CNN modeli için
-cnn_model = Sequential()
-cnn_model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(X_train.shape[1], X_train.shape[2])))
-cnn_model.add(MaxPooling1D(pool_size=2))
-cnn_model.add(Flatten())
-cnn_model.add(Dense(64, activation='relu'))
-cnn_model.add(Dense(1, activation='sigmoid'))
-cnn_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-cnn_model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=2, callbacks=[early_stopping])
-
-cnn_pred = (cnn_model.predict(X_test) > 0.5).astype(int)
-cnn_accuracy = accuracy_score(y_test, cnn_pred)
-
-print("CNN Test Seti Doğruluğu:", cnn_accuracy)
-print("CNN Classification Report for Test Set:")
-print(classification_report(y_test, cnn_pred, zero_division=1))
-
-# RNN modeli için
+# RNN Modeli Tanımlama ve Eğitme
 rnn_model = Sequential()
-rnn_model.add(SimpleRNN(128, input_shape=(X_train.shape[1], X_train.shape[2]), activation='relu'))
-rnn_model.add(Dense(1, activation='sigmoid'))
-rnn_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+rnn_model.add(SimpleRNN(64, input_shape=(X_train_exp.shape[1], 1)))
+rnn_model.add(Dense(128, activation='relu'))
+rnn_model.add(Dropout(0.5))
+rnn_model.add(Dense(3, activation='softmax'))  # 3 sınıf olduğu için 'softmax' kullanıyoruz
 
-rnn_model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=2, callbacks=[early_stopping])
+rnn_model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
 
-rnn_pred = (rnn_model.predict(X_test) > 0.5).astype(int)
-rnn_accuracy = accuracy_score(y_test, rnn_pred)
+rnn_history = rnn_model.fit(X_train_exp, y_train, epochs=10, validation_data=(X_test_exp, y_test), 
+                            batch_size=32, callbacks=[early_stopping])
 
-print("RNN Test Seti Doğruluğu:", rnn_accuracy)
-print("RNN Classification Report for Test Set:")
-print(classification_report(y_test, rnn_pred, zero_division=1))
+# RNN Modeli Değerlendirme
+rnn_test_loss, rnn_test_accuracy = rnn_model.evaluate(X_test_exp, y_test, verbose=2)
+print(f'RNN Modeli Test Seti Doğruluğu: {rnn_test_accuracy}')
 
-# LSTM modeli için
+rnn_y_test_pred = rnn_model.predict(X_test_exp)
+rnn_y_test_pred_classes = np.argmax(rnn_y_test_pred, axis=1)
+
+print("\nRNN Modeli Test Seti Sınıflandırma Raporu:")
+print(classification_report(y_test, rnn_y_test_pred_classes, zero_division=1))
+
+
+# LSTM Modeli Tanımlama ve Eğitme
 lstm_model = Sequential()
-lstm_model.add(LSTM(128, input_shape=(X_train.shape[1], X_train.shape[2]), activation='relu'))
-lstm_model.add(Dense(1, activation='sigmoid'))
-lstm_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+lstm_model.add(LSTM(64, input_shape=(X_train_exp.shape[1], 1)))
+lstm_model.add(Dense(128, activation='relu'))
+lstm_model.add(Dropout(0.5))
+lstm_model.add(Dense(3, activation='softmax'))  # 3 sınıf olduğu için 'softmax' kullanıyoruz
 
-lstm_model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=2, callbacks=[early_stopping])
+lstm_model.compile(loss='sparse_categorical_crossentropy',
+                   optimizer='adam',
+                   metrics=['accuracy'])
 
-lstm_pred = (lstm_model.predict(X_test) > 0.5).astype(int)
-lstm_accuracy = accuracy_score(y_test, lstm_pred)
+lstm_history = lstm_model.fit(X_train_exp, y_train, epochs=10, validation_data=(X_test_exp, y_test), 
+                              batch_size=32, callbacks=[early_stopping])
 
-print("LSTM Test Seti Doğruluğu:", lstm_accuracy)
-print("LSTM Classification Report for Test Set:")
-print(classification_report(y_test, lstm_pred, zero_division=1))
+# LSTM Modeli Değerlendirme
+lstm_test_loss, lstm_test_accuracy = lstm_model.evaluate(X_test_exp, y_test, verbose=2)
+print(f'LSTM Modeli Test Seti Doğruluğu: {lstm_test_accuracy}')
+
+lstm_y_test_pred = lstm_model.predict(X_test_exp)
+lstm_y_test_pred_classes = np.argmax(lstm_y_test_pred, axis=1)
+
+print("\nLSTM Modeli Test Seti Sınıflandırma Raporu:")
+print(classification_report(y_test, lstm_y_test_pred_classes, zero_division=1))
+
+
+# CNN Modeli Tanımlama ve Eğitme
+cnn_model = Sequential()
+cnn_model.add(Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(X_train_exp.shape[1], 1)))
+cnn_model.add(GlobalMaxPooling1D())
+cnn_model.add(Dense(128, activation='relu'))
+cnn_model.add(Dropout(0.5))
+cnn_model.add(Dense(3, activation='softmax'))  # 3 sınıf olduğu için 'softmax' kullanıyoruz
+
+cnn_model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
+
+cnn_history = cnn_model.fit(X_train_exp, y_train, epochs=10, validation_data=(X_test_exp, y_test), 
+                            batch_size=32, callbacks=[early_stopping])
+
+# CNN Modeli Değerlendirme
+cnn_test_loss, cnn_test_accuracy = cnn_model.evaluate(X_test_exp, y_test, verbose=2)
+print(f'CNN Modeli Test Seti Doğruluğu: {cnn_test_accuracy}')
+
+cnn_y_test_pred = cnn_model.predict(X_test_exp)
+cnn_y_test_pred_classes = np.argmax(cnn_y_test_pred, axis=1)
+
+print("\nCNN Modeli Test Seti Sınıflandırma Raporu:")
+print(classification_report(y_test, cnn_y_test_pred_classes, zero_division=1))
